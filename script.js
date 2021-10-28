@@ -6,10 +6,12 @@ let CONTEXT = null;
 let SCALER = 0.8;
 let SIZE = { x: 0, y: 0, width: 0, height: 0, rows: 3, columns: 3 };
 let PIECES = [];
+let SELECTED_PIECE = null;
 
 function main() {
   CANVAS = document.getElementById("myCanvas");
   CONTEXT = CANVAS.getContext("2d");
+  addEventListener();
 
   let promise = navigator.mediaDevices.getUserMedia({ video: true });
   promise
@@ -30,6 +32,49 @@ function main() {
     });
 }
 
+function addEventListener() {
+  CANVAS.addEventListener("mousemove", onMouseMove);
+  CANVAS.addEventListener("mousedown", onMouseDown);
+  CANVAS.addEventListener("mouseup", onMouseUp);
+}
+
+function onMouseDown(evt) {
+  SELECTED_PIECE = getPressedPiece(evt);
+  if (SELECTED_PIECE != null) {
+    SELECTED_PIECE.offset = {
+      x: evt.x - SELECTED_PIECE.x,
+      y: evt.y - SELECTED_PIECE.y
+    };
+  }
+}
+function onMouseMove(evt) {
+  SELECTED_PIECE = getPressedPiece(evt);
+  if (SELECTED_PIECE != null) {
+    SELECTED_PIECE.x = evt.x - SELECTED_PIECE.offset.x;
+    SELECTED_PIECE.y = evt.y - SELECTED_PIECE.offset.y;
+  }
+}
+function onMouseUp(evt) {
+  if (SELECTED_PIECE.isClose()) {
+    SELECTED_PIECE.snap();
+  }
+  SELECTED_PIECE = null;
+}
+
+function getPressedPiece(loc) {
+  for (let i = 0; i < PIECES.length; i++) {
+    if (
+      loc.x > PIECES[i].x &&
+      loc.x < PIECES[i].x + PIECES[i].width &&
+      loc.y > PIECES[i].y &&
+      loc.y < PIECES[i].y + PIECES[i].height
+    ) {
+      return PIECES[i];
+    }
+  }
+  return null;
+}
+
 function handleResize() {
   CANVAS.width = window.innerWidth;
   CANVAS.height = window.innerHeight;
@@ -47,7 +92,7 @@ function handleResize() {
 
 function updateCanvas() {
   CONTEXT.clearRect(0, 0, CANVAS.width, CANVAS.height);
-  
+
   CONTEXT.globalAlpha = 0.5;
   CONTEXT.drawImage(VIDEO, SIZE.x, SIZE.y, SIZE.width, SIZE.height);
   CONTEXT.globalAlpha = 1;
