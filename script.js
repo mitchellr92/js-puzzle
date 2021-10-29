@@ -61,8 +61,21 @@ function restart() {
 function updateTime() {
   let now = new Date().getTime();
   if (START_TIME != null) {
-    document.getElementById("time").innerHTML = formatTime(now - START_TIME);
+    if (END_TIME != null) {
+      document.getElementById("time").innerHTML = formatTime(END_TIME - START_TIME);
+    } else {
+      document.getElementById("time").innerHTML = formatTime(now - START_TIME);
+    }
   }
+}
+
+function isComplete() {
+  for (let i = 0; i < PIECES.length; i++) {
+    if (PIECES[i].correct == false) {
+      return false;
+    }
+  }
+  return true;
 }
 
 function formatTime(milliseconds) {
@@ -119,6 +132,7 @@ function onMouseDown(evt) {
       x: evt.x - SELECTED_PIECE.x,
       y: evt.y - SELECTED_PIECE.y
     };
+    SELECTED_PIECE.correct = false;
   }
 }
 function onMouseMove(evt) {
@@ -130,6 +144,10 @@ function onMouseMove(evt) {
 function onMouseUp() {
   if (SELECTED_PIECE.isClose()) {
     SELECTED_PIECE.snap();
+    if (isComplete() && END_TIME == null) {
+      let now = new Date().getTime();
+      END_TIME = now;
+    }
   }
   SELECTED_PIECE = null;
 }
@@ -197,6 +215,7 @@ function randomizePieces() {
     };
     PIECES[i].x = loc.x;
     PIECES[i].y = loc.y;
+    PIECES[i].correct = false;
   }
 }
 
@@ -210,6 +229,7 @@ class Piece {
     this.height = SIZE.height / SIZE.rows;
     this.xCorrect = this.x;
     this.yCorrect = this.y;
+    this.correct = true;
   }
   draw(context) {
     context.beginPath();
@@ -244,6 +264,7 @@ class Piece {
   snap() {
     this.x = this.xCorrect;
     this.y = this.yCorrect;
+    this.correct = true;
   }
 }
 
