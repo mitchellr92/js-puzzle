@@ -10,6 +10,9 @@ let SELECTED_PIECE = null;
 let START_TIME = null;
 let END_TIME = null;
 
+let POP_SOUND = new Audio("./sounds/pop.mp3");
+POP_SOUND.volume = 0.5;
+
 function main() {
   CANVAS = document.getElementById("myCanvas");
   CONTEXT = CANVAS.getContext("2d");
@@ -62,7 +65,9 @@ function updateTime() {
   let now = new Date().getTime();
   if (START_TIME != null) {
     if (END_TIME != null) {
-      document.getElementById("time").innerHTML = formatTime(END_TIME - START_TIME);
+      document.getElementById("time").innerHTML = formatTime(
+        END_TIME - START_TIME
+      );
     } else {
       document.getElementById("time").innerHTML = formatTime(now - START_TIME);
     }
@@ -265,6 +270,7 @@ class Piece {
     this.x = this.xCorrect;
     this.y = this.yCorrect;
     this.correct = true;
+    POP_SOUND.play();
   }
 }
 
